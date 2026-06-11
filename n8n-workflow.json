@@ -1,0 +1,74 @@
+{
+  "name": "Alcovia Focus Session Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "alvico-sync",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "alvico-focus-sync"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "sessionId",
+        "options": {}
+      },
+      "id": "dedupe-session",
+      "name": "Dedupe by sessionId",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 1,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst body = item.body ?? item;\nconst message = `Streak now ${body.streak} days, +${body.coinsEarned} coins.`;\nreturn [{\n  json: {\n    sessionId: body.sessionId,\n    studentId: body.studentId,\n    streak: body.streak,\n    coinsEarned: body.coinsEarned,\n    message,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "format-message",
+      "name": "Format WhatsApp Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3001/api/mock-notify",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "mock-notify",
+      "name": "Mock WhatsApp Sink",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Dedupe by sessionId", "type": "main", "index": 0 }]]
+    },
+    "Dedupe by sessionId": {
+      "main": [[{ "node": "Format WhatsApp Message", "type": "main", "index": 0 }]]
+    },
+    "Format WhatsApp Message": {
+      "main": [[{ "node": "Mock WhatsApp Sink", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "description": "Import into n8n. Activate workflow, then set N8N_WEBHOOK_URL=http://localhost:5678/webhook/alvico-sync on the Express server. Dedupes on sessionId so replays from multi-device sync only notify once."
+  }
+}

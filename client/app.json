@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "name": "Alvico Todo",
+    "slug": "alvico-todo",
+    "version": "1.0.0",
+    "assetBundlePatterns": ["**/*"],
+    "web": {}
+  }
+}

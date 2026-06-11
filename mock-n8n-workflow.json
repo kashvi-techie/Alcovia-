@@ -1,0 +1,124 @@
+{
+  "name": "Alvico Todo Sync Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "alvico-sync",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [100, 200]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "conditions": {
+          "options": {}
+        }
+      },
+      "id": "deduplication-node",
+      "name": "Deduplicate on sessionId",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [400, 200],
+      "notesInFlow": true,
+      "notes": "This node removes duplicate entries based on sessionId field. Only the first occurrence of each sessionId is passed through."
+    },
+    {
+      "parameters": {
+        "functionCode": "return items.map(item => {\n  const timestamp = new Date().toISOString();\n  const message = `[${timestamp}] Focus Session Completed\\nStudent: ${item.json.studentId}\\nSession ID: ${item.json.sessionId}\\nCoins Earned: ${item.json.coinsEarned}\\nStreak: ${item.json.streak}`;\n  return {\n    json: {\n      level: 'info',\n      message: message,\n      metadata: {\n        sessionId: item.json.sessionId,\n        studentId: item.json.studentId,\n        coinsEarned: item.json.coinsEarned,\n        streak: item.json.streak,\n        timestamp: timestamp\n      }\n    }\n  };\n});"
+      },
+      "id": "format-log",
+      "name": "Format Log Message",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [700, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:3000/log",
+        "sendBody": true,
+        "bodyParametersJson": "={\"level\": \"info\", \"message\": \"{{$node['Format Log Message'].json.message}}\", \"metadata\": {{$node['Format Log Message'].json.metadata}}}",
+        "options": {}
+      },
+      "id": "http-log-request",
+      "name": "Send HTTP Log Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1000, 200],
+      "notesInFlow": true,
+      "notes": "Sends the formatted log message to a mock HTTP log service. In production, this could be Slack, email, database, etc."
+    },
+    {
+      "parameters": {
+        "mode": "simple",
+        "simpleData": true,
+        "jsonData": "={\n  \"success\": true,\n  \"sessionId\": \"{{$node['Webhook Trigger'].json.sessionId}}\",\n  \"message\": \"Session processed and logged\"\n}"
+      },
+      "id": "response-node",
+      "name": "Return Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1300, 200]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Deduplicate on sessionId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deduplicate on sessionId": {
+      "main": [
+        [
+          {
+            "node": "Format Log Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Log Message": {
+      "main": [
+        [
+          {
+            "node": "Send HTTP Log Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send HTTP Log Notification": {
+      "main": [
+        [
+          {
+            "node": "Return Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {},
+  "versionId": "1",
+  "meta": {
+    "description": "Alvico Todo Focus Session Webhook\n\n1. Receives webhook POST from Alvico server (/api/sync completion)\n2. Deduplicates entries by sessionId (prevents duplicate processing)\n3. Formats log message with student ID, coins earned, streak\n4. Sends HTTP POST to mock log service\n5. Returns success response\n\nPayload format:\n{\n  \"studentId\": \"kashvi_pundir\",\n  \"streak\": 1,\n  \"coinsEarned\": 10,\n  \"sessionId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"timestamp\": 1700000000000\n}",
+    "instanceId": "alvico-prod-01",
+    "tags": ["alvico-todo", "webhook", "focus-session", "n8n"]
+  }
+}
