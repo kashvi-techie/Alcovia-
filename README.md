@@ -500,6 +500,47 @@ Perfect for teaching:
 - Offline-first PWA design
 - Sync algorithms without third-party libraries
 
+## 🚀 Deployment
+
+### Vercel Deployment (Frontend)
+
+This project is Vercel-ready. Deploy the Expo web app with one click:
+
+1. **Connect to Vercel:**
+   - Go to [vercel.com](https://vercel.com)
+   - Import your GitHub repository
+   - Vercel will automatically detect the `vercel.json` configuration
+
+2. **Configure Environment Variables:**
+   - Set `REACT_APP_API_URL` to your backend URL (e.g., `https://your-api.herokuapp.com`)
+
+3. **Deploy:**
+   - Click "Deploy"
+   - Vercel will run `npm run vercel-build` to build the Expo web app
+
+**Manual deployment:**
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel --prod
+```
+
+### Backend Deployment
+
+The Express server can be deployed separately to platforms like:
+- **Heroku**: Push to Heroku with `heroku create` and deploy
+- **Railway**: Connect GitHub repo and deploy
+- **Render**: Create a new Web Service from GitHub
+
+### Full-Stack Deployment
+
+For a complete deployment:
+1. Deploy backend to Heroku/Railway/Render
+2. Deploy frontend to Vercel
+3. Update `REACT_APP_API_URL` in client `.env` to point to your backend URL
+
 ## 🔮 Future Enhancements
 
 ### Phase 2: Persistence
