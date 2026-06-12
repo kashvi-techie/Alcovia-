@@ -9,7 +9,8 @@
     "web": "expo start --web",
     "dev": "set EXPO_USE_METRO_WORKSPACE_ROOT=true && expo start --web --clear",
     "clear:metro": "set EXPO_USE_METRO_WORKSPACE_ROOT=true && expo start --web --clear",
-    "clean:start": "taskkill /F /IM node.exe 2>nul || echo \"No node processes to kill\" && set EXPO_USE_METRO_WORKSPACE_ROOT=true && npx expo start --web --clear"
+    "clean:start": "taskkill /F /IM node.exe 2>nul || echo \"No node processes to kill\" && set EXPO_USE_METRO_WORKSPACE_ROOT=true && npx expo start --web --clear",
+    "vercel-build": "cd .. && npm install && cd client && npx expo export --platform web"
   },
   "dependencies": {
     "@alvico/shared": "*",
