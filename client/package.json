@@ -12,7 +12,7 @@
     "clean:start": "taskkill /F /IM node.exe 2>nul || echo \"No node processes to kill\" && set EXPO_USE_METRO_WORKSPACE_ROOT=true && npx expo start --web --clear"
   },
   "dependencies": {
-    "@alvico/shared": "file:../shared",
+    "@alvico/shared": "*",
     "@expo/metro-runtime": "~3.1.3",
     "axios": "^1.6.0",
     "expo": "~50.0.0",

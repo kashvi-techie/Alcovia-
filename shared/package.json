@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "types": "src/index.ts",
+  "source": "src/index.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch"

@@ -1,6 +1,20 @@
 const { getDefaultConfig } = require('expo/metro-config');
+const path = require('path');
 
-const config = getDefaultConfig(__dirname);
+// Get the project root (monorepo root)
+const projectRoot = __dirname;
+const workspaceRoot = path.resolve(projectRoot, '..');
+
+const config = getDefaultConfig(projectRoot);
+
+// Enable workspace root for monorepo resolution
+config.watchFolders = [workspaceRoot];
+
+// Add resolver for @alvico/shared package
+config.resolver.nodeModulesPaths = [
+  path.resolve(projectRoot, 'node_modules'),
+  path.resolve(workspaceRoot, 'node_modules'),
+];
 
 // COMPLETELY DISABLE node:sea EXTERNAL SHIMS FOR WINDOWS
 // This blocks all node: protocol modules that cause Windows colon character issues
